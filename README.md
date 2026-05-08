@@ -1,0 +1,106 @@
+# Finance MCP
+
+[![CI](https://github.com/yourusername/finance-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/finance-mcp/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/Coverage-78%25-brightgreen.svg)](#)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A portfolio-grade **Model Context Protocol (MCP)** server that exposes financial and stock market data as tools for Claude Desktop and other MCP clients. 
+
+Built using Python 3.12, the official `mcp[cli]` SDK, and `yfinance`. **No API key is required!**
+
+<!-- TODO: Create a demo of the Finance MCP in action and save it as docs/demo.gif -->
+![Demo Screenshot](docs/demo.gif) *(Demo placeholder)*
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Client([MCP Client<br/>e.g., Claude Desktop]) <-->|stdio / JSON-RPC| Server[finance-mcp]
+    
+    subgraph finance-mcp
+        Server <--> Cache[(TTL Cache)]
+        Server <--> Provider[Data Provider Interface]
+        Provider --> YF[yfinance API]
+        Provider -.-> AV[Alpha Vantage<br/>Fallback]
+    end
+    
+    YF <--> Internet((Web))
+    AV -.-> Internet
+```
+
+## Example Queries
+
+Try asking Claude these natural-language prompts once the server is configured:
+
+1. **"What is the current stock price and trading volume for AAPL?"** *(Uses `get_quote`)*
+2. **"Compare the fundamentals of AAPL vs MSFT."** *(Uses `compare_stocks`)*
+3. **"Show me the RSI for TSLA."** *(Uses `calc_indicators`)*
+4. **"Can you pull the 1-month historical OHLCV data for NVDA with a 1-day interval?"** *(Uses `get_history`)*
+5. **"What is the P/E ratio and market cap for GOOGL?"** *(Uses `get_fundamentals`)*
+
+
+## What It Is
+
+Finance MCP allows any AI assistant that supports the Model Context Protocol to seamlessly retrieve real-time and historical stock market data, calculate technical indicators, and compare multiple assets. It uses a robust, asynchronous architecture with Pydantic for data validation and built-in TTL caching to optimize network requests.
+
+## Tools Available
+
+- **`get_quote(symbol)`**: Get the current price, percentage change, and trading volume for a stock.
+- **`get_history(symbol, period, interval)`**: Retrieve historical OHLCV (Open, High, Low, Close, Volume) data.
+- **`get_fundamentals(symbol)`**: Fetch key financial metrics like P/E ratio, market cap, dividend yield, and sector.
+- **`compare_stocks(symbols)`**: Compare side-by-side metrics across a list of stock symbols.
+- **`calc_indicators(symbol, indicator)`**: Calculate technical indicators such as RSI, MACD, and Simple Moving Averages (SMA20, SMA50, SMA200).
+
+## Installation
+
+1. Ensure you have `uv` installed.
+2. Clone this repository and sync the dependencies:
+
+```bash
+git clone https://github.com/yourusername/finance-mcp.git
+cd finance-mcp
+uv sync
+```
+
+## Claude Desktop Configuration
+
+To use this server with Claude Desktop, add the following configuration to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "finance": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/finance-mcp",
+        "finance-mcp"
+      ]
+    }
+  }
+}
+```
+
+*Make sure to replace `/absolute/path/to/finance-mcp` with the actual path on your machine.*
+
+## Development Setup
+
+The project uses `uv` for environment management, `pytest` for testing, `ruff` for linting, and `mypy` for type-checking.
+
+1. Install dev dependencies:
+   ```bash
+   uv sync --dev
+   ```
+
+2. Run tests:
+   ```bash
+   uv run pytest tests/
+   ```
+
+3. Run linting & type-checking:
+   ```bash
+   uv run ruff check src/ tests/
+   uv run mypy --strict src/ tests/
+   ```
