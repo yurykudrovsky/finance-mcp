@@ -1,7 +1,59 @@
-.venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files (keep .env.example)
 .env
-.DS_Store
+.env.*
+!.env.example
+
+# Credentials / keys
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# Distribution / packaging
 dist/
+build/
 *.egg-info/
+*.egg
+MANIFEST
+wheels/
+
+# Test artefacts
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Type checking
+.mypy_cache/
+
+# Linting
+.ruff_cache/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# OS
+__MACOSX/
