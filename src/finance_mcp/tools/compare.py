@@ -20,7 +20,7 @@ async def compare_stocks(symbols: list[str]) -> Comparison:
                 market_cap=funds.market_cap,
                 change_percent=quote.change_percent,
             )
-        except Exception:
+        except (ValueError, KeyError, OSError):
             return sym, Metrics()
 
     results = await asyncio.gather(*[fetch_for_symbol(sym) for sym in symbols])

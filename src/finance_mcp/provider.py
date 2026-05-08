@@ -6,6 +6,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Expected runtime failures from yfinance (uses requests internally):
+#   ValueError/KeyError  – bad symbol or missing data fields
+#   AttributeError       – yfinance object attribute missing
+#   OSError              – covers requests.exceptions.ConnectionError /
+#                          Timeout which both ultimately subclass OSError
+_YFINANCE_ERRORS = (ValueError, KeyError, AttributeError, OSError)
+
+# Expected runtime failures from the httpx-based Alpha Vantage call:
+_AV_ERRORS = (ValueError, KeyError, httpx.RequestError, httpx.HTTPStatusError)
+
 
 class DataProvider:
     @staticmethod
@@ -13,16 +23,16 @@ class DataProvider:
         """Fetch quote using yfinance, fallback to Alpha Vantage."""
         try:
             return DataProvider._get_quote_yfinance(symbol)
-        except Exception as e_yf:
+        except _YFINANCE_ERRORS as e_yf:
             print(
                 f"yfinance failed for {symbol}: {e_yf}. Falling back to Alpha Vantage..."
             )
             try:
                 return DataProvider._get_quote_alphavantage(symbol)
-            except Exception as e_av:
+            except _AV_ERRORS as e_av:
                 raise ValueError(
                     f"Both yfinance and Alpha Vantage failed for {symbol}. AV Error: {e_av}"
-                )
+                ) from e_av
 
     @staticmethod
     def _get_quote_yfinance(symbol: str) -> Quote:
