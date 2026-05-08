@@ -1,16 +1,15 @@
 # Finance MCP
 
-[![CI](https://github.com/yourusername/finance-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/finance-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/yurykudrovsky/finance-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/yurykudrovsky/finance-mcp/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/Coverage-78%25-brightgreen.svg)](#)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A portfolio-grade **Model Context Protocol (MCP)** server that exposes financial and stock market data as tools for Claude Desktop and other MCP clients. 
+A production-grade **Model Context Protocol (MCP)** server that turns Claude Desktop into a quantitative financial analyst. Seamlessly exposes real-time stock market data, historical OHLCV, and technical indicators natively to LLMs. 
 
 Built using Python 3.12, the official `mcp[cli]` SDK, and `yfinance`. **No API key is required!**
 
-<!-- TODO: Create a demo of the Finance MCP in action and save it as docs/demo.gif -->
-![Demo Screenshot](docs/demo.gif) *(Demo placeholder - See `docs/RECORDING.md` for Claude Desktop script, or generate using `vhs docs/demo.tape`)*
+![Demo Screenshot](docs/demo.gif) *(Generated using `vhs docs/demo.tape`)*
 
 ## Architecture
 
@@ -58,7 +57,7 @@ Finance MCP allows any AI assistant that supports the Model Context Protocol to 
 2. Clone this repository and sync the dependencies:
 
 ```bash
-git clone https://github.com/yourusername/finance-mcp.git
+git clone https://github.com/yurykudrovsky/finance-mcp.git
 cd finance-mcp
 uv sync
 ```
