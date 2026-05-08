@@ -1,29 +1,62 @@
 # Building a Resilient Finance MCP Server
 
-The Model Context Protocol (MCP) has opened the floodgates for making AI assistants genuinely useful. I've always wanted to query stock market fundamentals, compare tickers, and calculate RSI natively inside my chat with Claude Desktop. But I didn't want to wrestle with complex API authentications or constantly refreshing dashboard UI. That's why I built `finance-mcp`, an asynchronous, Python-powered MCP server that pipes financial data straight into the LLM context window.
+AI agents are only as smart as the data they can access. To turn Claude into a production-grade financial analyst, I built `finance-mcp`—an asynchronous, Python-powered Model Context Protocol (MCP) server that pipes live stock quotes, OHLCV history, and technical indicators directly into the LLM's context window. No API keys required, zero configuration, and sub-second latency.
 
 ## Why MCP?
 
-Before MCP, extending an LLM meant writing dedicated plugin architectures or hard-coding API integrations that broke the moment an endpoint shifted. MCP standardizes this. By building an MCP server, I abstract away the messy world of HTTP requests and raw JSON parsing. I simply define a strict Pydantic schema for what Claude *can* do, and Claude natively understands the capabilities. 
+Before MCP, giving an LLM access to real-world data meant wrestling with brittle, proprietary plugin architectures that broke with every upstream change. MCP standardizes this. By building an MCP server, I abstracted away HTTP requests and JSON parsing into a strict Pydantic schema that Claude natively understands.
 
-If I type: *"Compare the fundamentals of AAPL vs MSFT"*, Claude instantly queries the `compare_stocks` tool on my server, reads the returned Markdown payload, and synthesizes it seamlessly.
+Now, typing *"Compare AAPL and MSFT fundamentals"* prompts Claude to autonomously query the `compare_stocks` tool, ingest the Markdown payload, and synthesize the results instantly.
 
-## The DataProvider Fallback Pattern
+## Engineering Resilience: The DataProvider Pattern
 
-One of the main goals for `finance-mcp` was ensuring users could clone the repo and run it instantly—no API keys required. I chose `yfinance` as the primary engine. It aggressively scrapes Yahoo Finance and works right out of the box.
+A core design principle for `finance-mcp` was a seamless developer experience: clone, run, and go. While `yfinance` serves as an excellent zero-config primary engine, its reliance on undocumented endpoints introduces risk. 
 
-However, `yfinance` relies on undocumented endpoints. If Yahoo updates its frontend, the library can temporarily break. To engineer resilience, I implemented a `DataProvider` pattern. The server attempts to fetch from `yfinance`, and if it hits an exception, it seamlessly falls back to a secondary provider (like Alpha Vantage) via a generic interface. 
+To guarantee uptime, I implemented a robust `DataProvider` interface. If the primary source fails or hits a rate limit, the server seamlessly degrades to a secondary provider (like Alpha Vantage).
 
-The user never notices the disruption. Claude simply waits a few extra milliseconds.
+```python
+class DataProvider:
+    @staticmethod
+    def get_quote(symbol: str) -> Quote:
+        """Fetch quote using yfinance, seamlessly fallback to Alpha Vantage on failure."""
+        try:
+            return DataProvider._get_quote_yfinance(symbol)
+        except Exception as e_yf:
+            print(f"yfinance failed for {symbol}. Falling back to Alpha Vantage...")
+            return DataProvider._get_quote_alphavantage(symbol)
+```
+
+The user never notices the disruption. Claude simply waits a few extra milliseconds, and the analysis continues flawlessly.
 
 ## Surviving the Throttling: The TTL Cache Strategy
 
-LLMs are notoriously chatty. Sometimes Claude will query the same stock ticker three times in a single logical reasoning step to double-check its own math. Without a caching layer, `yfinance` would get rate-limited instantly.
+LLMs are notoriously aggressive with tool usage. Claude will frequently query the same ticker multiple times in a single logical step to verify its own reasoning. Without a caching layer, upstream data providers would aggressively rate-limit the server.
 
-I built a lightweight, asynchronous TTL (Time-To-Live) cache directly into the tool layer. Fast-moving data (like stock quotes) gets a 60-second TTL. Slow-moving data (like market cap or P/E ratio) gets a generous 1-hour TTL. By wrapping the cache around the tool handler, the MCP server can absorb hundreds of identical queries without ever pinging the upstream data source twice. 
+To solve this, I engineered a lightweight, asynchronous Time-To-Live (TTL) cache directly into the tool layer using a custom Python decorator:
 
-## What I Learned
+```python
+def with_cache(ttl: float):
+    """Decorator to cache tool responses and prevent upstream rate limits."""
+    cache = TTLCache(ttl)
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            key = f"{func.__name__}:{str(args)}:{str(kwargs)}"
+            if cached := cache.get(key):
+                return cached
+            result = await func(*args, **kwargs)
+            cache.set(key, result)
+            return result
+        return wrapper
+    return decorator
+```
 
-Building this taught me that the bottleneck in agentic AI is no longer the LLM's reasoning—it's the quality of the tools we provide. If an MCP server returns messy data, the LLM hallucinates. If it returns clean, strongly-typed JSON via Pydantic, the LLM feels magical. 
+Fast-moving data (like live quotes) receives a tight 60-second TTL, while slow-moving data (like P/E ratios) persists for an hour. This architecture enables the server to absorb hundreds of identical queries without generating redundant network requests.
 
-You can check out `finance-mcp` on my GitHub. It's fully open-source, async from the ground up, and thoroughly tested. Give it a try, and let Claude be your personal financial analyst.
+## What's Next
+
+Building `finance-mcp` reinforced a critical lesson: the bottleneck in agentic AI is no longer reasoning capabilities—it's tool quality. If an MCP server returns messy or inconsistent data, the LLM hallucinates. When it provides clean, strongly-typed JSON via Pydantic, the LLM feels like magic.
+
+Next up, I plan to integrate real-time WebSocket streams and extend support to cryptocurrency markets.
+
+Want to turn Claude into your personal quantitative analyst? Check out the [finance-mcp GitHub Repository](https://github.com/yurykudrovsky/finance-mcp). It's fully open-source, async from the ground up, and thoroughly tested. Contributions are welcome!

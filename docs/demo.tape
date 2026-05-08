@@ -18,6 +18,6 @@ Sleep 1s
 Ctrl+C
 
 # Show a manual python script invoking the tool
-Type "uv run python -c \"import asyncio; from finance_mcp.tools.quote import get_quote; print(asyncio.run(get_quote('AAPL')))\""
+Type "uv run python demo.py"
 Enter
 Sleep 3s
