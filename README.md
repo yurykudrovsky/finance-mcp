@@ -10,7 +10,7 @@ A portfolio-grade **Model Context Protocol (MCP)** server that exposes financial
 Built using Python 3.12, the official `mcp[cli]` SDK, and `yfinance`. **No API key is required!**
 
 <!-- TODO: Create a demo of the Finance MCP in action and save it as docs/demo.gif -->
-![Demo Screenshot](docs/demo.gif) *(Demo placeholder)*
+![Demo Screenshot](docs/demo.gif) *(Demo placeholder - See `docs/RECORDING.md` for Claude Desktop script, or generate using `vhs docs/demo.tape`)*
 
 ## Architecture
 
