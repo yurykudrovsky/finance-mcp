@@ -7,7 +7,9 @@
 
 A production-grade **Model Context Protocol (MCP)** server that turns Claude Desktop into a quantitative financial analyst. Seamlessly exposes real-time stock market data, historical OHLCV, and technical indicators natively to LLMs. 
 
-Built using Python 3.12, the official `mcp[cli]` SDK, and `yfinance`. **No API key is required!**
+Built using Python 3.12, the official `mcp[cli]` SDK, and `yfinance`.
+
+> **API keys:** `yfinance` works without any API key and is the primary data source. An optional `ALPHA_VANTAGE_API_KEY` environment variable enables a fallback to [Alpha Vantage](https://www.alphavantage.co/) if `yfinance` fails. Without the key the server runs on `yfinance` only and skips the fallback — see `.env.example`.
 
 ![Demo Screenshot](docs/demo.gif) *(Generated using `vhs docs/demo.tape`)*
 
