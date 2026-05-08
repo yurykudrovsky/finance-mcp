@@ -5,14 +5,13 @@ from finance_mcp.cache import quote_cache
 
 
 @pytest.fixture(autouse=True)
-def clear_cache():
+def clear_cache() -> None:
     quote_cache._cache.clear()
 
 
 @pytest.mark.asyncio
 @patch("finance_mcp.provider.yf.Ticker")
-async def test_get_quote(mock_ticker):
-    # Setup mock
+async def test_get_quote(mock_ticker: MagicMock) -> None:
     mock_instance = MagicMock()
     mock_instance.fast_info = {
         "lastPrice": 150.0,
@@ -28,17 +27,16 @@ async def test_get_quote(mock_ticker):
     assert quote.change_percent == round(((150.0 - 145.0) / 145.0) * 100, 2)
     assert quote.volume == 1000000
 
-    # Test caching
     quote2 = await get_quote("AAPL")
     assert quote2.price == 150.0
-    mock_ticker.assert_called_once()  # Should only be called once because of cache
+    mock_ticker.assert_called_once()  # second call hits cache
 
 
 @pytest.mark.asyncio
 @patch("finance_mcp.provider.yf.Ticker")
-async def test_get_quote_invalid_symbol(mock_ticker):
+async def test_get_quote_invalid_symbol(mock_ticker: MagicMock) -> None:
     mock_instance = MagicMock()
-    mock_instance.fast_info = {}  # Empty info implies invalid ticker
+    mock_instance.fast_info = {}
     mock_ticker.return_value = mock_instance
 
     with pytest.raises(ValueError, match="Both yfinance and Alpha Vantage failed"):

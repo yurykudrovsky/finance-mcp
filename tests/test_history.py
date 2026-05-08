@@ -6,9 +6,8 @@ from finance_mcp.tools.history import get_history
 
 @pytest.mark.asyncio
 @patch("finance_mcp.tools.history.yf.Ticker")
-async def test_get_history(mock_ticker):
+async def test_get_history(mock_ticker: MagicMock) -> None:
     mock_instance = MagicMock()
-    # Create mock dataframe
     df = pd.DataFrame(
         {
             "Open": [100.0, 101.0],
@@ -32,6 +31,6 @@ async def test_get_history(mock_ticker):
 
 
 @pytest.mark.asyncio
-async def test_get_history_invalid_period():
+async def test_get_history_invalid_period() -> None:
     with pytest.raises(ValueError, match="Invalid period"):
         await get_history("AAPL", "invalid_period", "1d")

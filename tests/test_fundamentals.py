@@ -5,13 +5,13 @@ from finance_mcp.cache import fundamentals_cache
 
 
 @pytest.fixture(autouse=True)
-def clear_cache():
+def clear_cache() -> None:
     fundamentals_cache._cache.clear()
 
 
 @pytest.mark.asyncio
 @patch("finance_mcp.tools.fundamentals.yf.Ticker")
-async def test_get_fundamentals(mock_ticker):
+async def test_get_fundamentals(mock_ticker: MagicMock) -> None:
     mock_instance = MagicMock()
     mock_instance.info = {
         "symbol": "AAPL",

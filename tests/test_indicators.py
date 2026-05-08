@@ -6,9 +6,8 @@ from finance_mcp.tools.indicators import calc_indicators
 
 @pytest.mark.asyncio
 @patch("finance_mcp.tools.indicators.yf.Ticker")
-async def test_calc_indicators(mock_ticker):
+async def test_calc_indicators(mock_ticker: MagicMock) -> None:
     mock_instance = MagicMock()
-    # Create mock dataframe with enough data for SMA20
     dates = pd.date_range(start="2023-01-01", periods=30)
     df = pd.DataFrame(
         {
@@ -29,6 +28,6 @@ async def test_calc_indicators(mock_ticker):
 
 
 @pytest.mark.asyncio
-async def test_calc_indicators_invalid():
+async def test_calc_indicators_invalid() -> None:
     with pytest.raises(ValueError, match="Invalid indicator"):
         await calc_indicators("AAPL", "INVALID")
