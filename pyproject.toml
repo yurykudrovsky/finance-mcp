@@ -32,4 +32,3 @@ dev = [
 
 [tool.mypy]
 ignore_missing_imports = true
-disable_error_code = ["import-untyped", "untyped-decorator", "no-untyped-call", "type-arg", "no-untyped-def"]
