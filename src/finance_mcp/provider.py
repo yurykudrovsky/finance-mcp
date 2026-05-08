@@ -3,8 +3,11 @@ import httpx
 import yfinance as yf
 from finance_mcp.models import Quote
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
+
+logger = logging.getLogger("finance-mcp")
 
 # Expected runtime failures from yfinance (uses requests internally):
 #   ValueError/KeyError  – bad symbol or missing data fields
@@ -24,7 +27,7 @@ class DataProvider:
         try:
             return DataProvider._get_quote_yfinance(symbol)
         except _YFINANCE_ERRORS as e_yf:
-            print(
+            logger.warning(
                 f"yfinance failed for {symbol}: {e_yf}. Falling back to Alpha Vantage..."
             )
             try:
