@@ -6,6 +6,7 @@ from mcp.server.stdio import stdio_server
 import mcp.types as types
 from pydantic import BaseModel, Field
 
+from finance_mcp.models import ErrorResult
 from finance_mcp.tools.quote import get_quote
 from finance_mcp.tools.history import get_history
 from finance_mcp.tools.fundamentals import get_fundamentals
@@ -95,8 +96,17 @@ async def list_tools() -> list[types.Tool]:
 @server.call_tool()  # type: ignore
 async def call_tool(
     name: str, arguments: dict[str, typing.Any]
-) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-    """Execute a tool call."""
+) -> (
+    list[types.TextContent | types.ImageContent | types.EmbeddedResource]
+    | types.CallToolResult
+):
+    """Execute a tool call.
+
+    On error, returns types.CallToolResult(isError=True) with an ErrorResult
+    JSON payload.  The MCP SDK 1.x does not expose an ErrorContent type; the
+    isError flag on CallToolResult is the protocol-level error signal defined
+    in the MCP spec.
+    """
     try:
         if name == "get_quote":
             quote = await get_quote(arguments["symbol"])
@@ -129,10 +139,26 @@ async def call_tool(
             return [types.TextContent(type="text", text=news.model_dump_json(indent=2))]
 
         else:
-            return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
+            err = ErrorResult(code="unknown_tool", message=f"Unknown tool: {name}")
+            return types.CallToolResult(
+                content=[
+                    types.TextContent(type="text", text=err.model_dump_json(indent=2))
+                ],
+                isError=True,
+            )
     except Exception as e:
-        logger.error(f"Error calling {name} with args {arguments}: {e}")
-        return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+        logger.debug("Tool %s raised %s: %s", name, type(e).__name__, e)
+        err = ErrorResult(
+            code="tool_error",
+            message=str(e),
+            details=type(e).__name__,
+        )
+        return types.CallToolResult(
+            content=[
+                types.TextContent(type="text", text=err.model_dump_json(indent=2))
+            ],
+            isError=True,
+        )
 
 
 async def run() -> None:

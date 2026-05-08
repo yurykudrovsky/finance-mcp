@@ -67,3 +67,19 @@ class NewsItem(BaseModel):
 class NewsResult(BaseModel):
     symbol: str = Field(description="The stock ticker symbol")
     items: List[NewsItem] = Field(description="List of recent news items")
+
+
+class ErrorResult(BaseModel):
+    """Structured error returned by call_tool when a tool raises an exception.
+
+    Serialised as JSON in a TextContent block with CallToolResult.isError=True
+    so MCP clients can distinguish tool errors from successful responses.
+    The MCP SDK (1.x) does not expose an ErrorContent type; isError=True on
+    CallToolResult is the protocol-level signal defined in the MCP spec.
+    """
+
+    code: str = Field(description="Short error code, e.g. 'tool_error'")
+    message: str = Field(description="Human-readable error description")
+    details: Optional[str] = Field(
+        default=None, description="Optional extra context (exception type)"
+    )
