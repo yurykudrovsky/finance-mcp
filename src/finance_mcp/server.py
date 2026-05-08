@@ -11,6 +11,7 @@ from finance_mcp.tools.history import get_history
 from finance_mcp.tools.fundamentals import get_fundamentals
 from finance_mcp.tools.compare import compare_stocks
 from finance_mcp.tools.indicators import calc_indicators
+from finance_mcp.tools.news import get_news
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +48,13 @@ class IndicatorsInput(BaseModel):
     )
 
 
+class NewsInput(BaseModel):
+    symbol: str = Field(description="The stock ticker symbol")
+    limit: int = Field(
+        default=5, description="Maximum number of news items to return (1-20)"
+    )
+
+
 @server.list_tools()  # type: ignore
 async def list_tools() -> list[types.Tool]:
     """List available tools."""
@@ -75,6 +83,11 @@ async def list_tools() -> list[types.Tool]:
             name="calc_indicators",
             description="Calculate technical indicators (RSI, MACD, SMA20/50/200).",
             inputSchema=IndicatorsInput.model_json_schema(),
+        ),
+        types.Tool(
+            name="get_news",
+            description="Get recent news headlines, URLs, and timestamps for a stock symbol.",
+            inputSchema=NewsInput.model_json_schema(),
         ),
     ]
 
@@ -110,6 +123,10 @@ async def call_tool(
         elif name == "calc_indicators":
             ind = await calc_indicators(arguments["symbol"], arguments["indicator"])
             return [types.TextContent(type="text", text=ind.model_dump_json(indent=2))]
+
+        elif name == "get_news":
+            news = await get_news(arguments["symbol"], int(arguments.get("limit", 5)))
+            return [types.TextContent(type="text", text=news.model_dump_json(indent=2))]
 
         else:
             return [types.TextContent(type="text", text=f"Unknown tool: {name}")]

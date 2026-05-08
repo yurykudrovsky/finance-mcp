@@ -56,3 +56,14 @@ class Indicators(BaseModel):
     symbol: str = Field(description="The stock ticker symbol")
     indicator: str = Field(description="Name of the indicator (e.g. RSI, MACD, SMA)")
     data: List[IndicatorData] = Field(description="Indicator values over time")
+
+
+class NewsItem(BaseModel):
+    title: str = Field(description="News headline")
+    url: str = Field(description="Link to the full article")
+    published_at: str = Field(description="Publication timestamp (ISO-8601)")
+
+
+class NewsResult(BaseModel):
+    symbol: str = Field(description="The stock ticker symbol")
+    items: List[NewsItem] = Field(description="List of recent news items")

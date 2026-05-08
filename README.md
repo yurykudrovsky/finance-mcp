@@ -37,6 +37,7 @@ Try asking Claude these natural-language prompts once the server is configured:
 3. **"Show me the RSI for TSLA."** *(Uses `calc_indicators`)*
 4. **"Can you pull the 1-month historical OHLCV data for NVDA with a 1-day interval?"** *(Uses `get_history`)*
 5. **"What is the P/E ratio and market cap for GOOGL?"** *(Uses `get_fundamentals`)*
+6. **"What's the latest news on NVDA?"** *(Uses `get_news`)*
 
 
 ## What It Is
@@ -45,11 +46,14 @@ Finance MCP allows any AI assistant that supports the Model Context Protocol to 
 
 ## Tools Available
 
-- **`get_quote(symbol)`**: Get the current price, percentage change, and trading volume for a stock.
-- **`get_history(symbol, period, interval)`**: Retrieve historical OHLCV (Open, High, Low, Close, Volume) data.
-- **`get_fundamentals(symbol)`**: Fetch key financial metrics like P/E ratio, market cap, dividend yield, and sector.
-- **`compare_stocks(symbols)`**: Compare side-by-side metrics across a list of stock symbols.
-- **`calc_indicators(symbol, indicator)`**: Calculate technical indicators such as RSI, MACD, and Simple Moving Averages (SMA20, SMA50, SMA200).
+| Tool | Description | Cache TTL |
+|------|-------------|-----------|
+| `get_quote(symbol)` | Current price, % change, and trading volume | 60 s |
+| `get_history(symbol, period, interval)` | Historical OHLCV data | — |
+| `get_fundamentals(symbol)` | P/E ratio, market cap, dividend yield, sector | 1 h |
+| `compare_stocks(symbols)` | Side-by-side metrics for multiple symbols | — |
+| `calc_indicators(symbol, indicator)` | RSI, MACD, SMA20/50/200 | — |
+| `get_news(symbol, limit=5)` | Recent news headlines, URLs, and timestamps | 15 min |
 
 ## Installation
 
