@@ -1,0 +1,35 @@
+[project]
+name = "finance-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.27.0",
+    "pydantic>=2.13.4",
+    "python-dotenv>=1.2.2",
+    "yfinance>=1.3.0",
+]
+
+[project.scripts]
+finance-mcp = "finance_mcp:main"
+
+[build-system]
+requires = ["uv_build>=0.11.11,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=1.19.1",
+    "pre-commit>=4.6.0",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped", "untyped-decorator", "no-untyped-call", "type-arg", "no-untyped-def"]
