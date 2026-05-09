@@ -69,7 +69,7 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "finance": {
-      "command": "uv",
+      "command": "/absolute/path/to/uv",
       "args": [
         "run",
         "--directory",
@@ -81,7 +81,9 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-Replace `/absolute/path/to/finance-mcp` with the actual path on your machine.
+> **⚠️ macOS PATH gotcha:** The Claude Desktop GUI does not inherit your shell's `PATH`. If you just use `"command": "uv"`, it will likely fail silently. Find your absolute `uv` path by running `which uv` (e.g. `/usr/local/bin/uv` or `/opt/homebrew/bin/uv`) and use that instead.
+> 
+> Also make sure to replace `/absolute/path/to/finance-mcp` with the actual path on your machine.
 
 ## Development
 
